@@ -20,7 +20,6 @@ function handleNewBookmark(bookmark){
         if (folderDict[category]) {
             // Folder exists, move the bookmark to the folder
             chrome.bookmarks.move(bookmark.id, { parentId: folderDict[category] });
-            console.log(`Moved bookmark "${bookmark.title}" to category "${category}".`);
         } else {
             // Handle bookmarks without a matching folder
             const otherCategory = "Others"; // Default folder for uncategorized bookmarks
@@ -28,14 +27,17 @@ function handleNewBookmark(bookmark){
             if (folderDict[otherCategory]) {
                 // Move to the "Others" folder if it exists
                 chrome.bookmarks.move(bookmark.id, { parentId: folderDict[otherCategory] });
-                console.log(`Moved bookmark "${bookmark.title}" to category "${otherCategory}".`);
             }
         }
     });
+
+    chrome.runtime.sendMessage({action: "bookmarkUpdated", title: bookmark.title, label: category}){
+        console.log(`Moved bookmark "${bookmark.title}" to category "${category}".`);
+    }
 }
 
 // Function to categorize bookmarks based on the URL
 function determineCategory(url){
-
+    return "Study" //debug
 }
 

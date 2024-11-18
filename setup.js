@@ -4,8 +4,8 @@ export async function initialSetup() {
 
   //?? 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "createFolders") {
-      const folderNames = [...request.folderNames, "Others"]; // Add "Others" to the list of folders
+    if (request.action === "storeLabels") {
+      const folderNames = [...request.labels, "Others"]; // Add "Others" to the list of folders
 
       // Create folders and populate the dictionary
       const folderPromises = folderNames.map((folderName) =>
