@@ -11,15 +11,13 @@ function initialize () {
     chrome.storage.local.get("setupComplete", (data) => {
         if (!data.setupComplete) {
           // If setup is not complete, run setup.js
-          import('./setup.js').then((module) => {
-            module.runSetup(() => {
-                // After setup, transition to bookmark.js
-                runBookmarkModule();
-            });
+          import('./setup.js').then(({runSetup}) => {
+              runSetup();
           });
+          runBookmarkModule(); // After setup, transition to bookmark.js
         } else {
-            // Setup is complete, run bookmark.js
-            runBookmarkModule();
+          // Setup is complete, run bookmark.js
+          runBookmarkModule();
         }
       });
 }
