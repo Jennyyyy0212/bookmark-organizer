@@ -31,9 +31,9 @@ function handleNewBookmark(bookmark){
         }
     });
 
-    chrome.runtime.sendMessage({action: "bookmarkUpdated", title: bookmark.title, label: category}){
+    chrome.runtime.sendMessage({action: "bookmarkUpdated", title: bookmark.title, label: category}, function(){
         console.log(`Moved bookmark "${bookmark.title}" to category "${category}".`);
-    }
+    });
 }
 
 // Function to categorize bookmarks based on the URL
