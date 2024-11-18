@@ -14,7 +14,7 @@
         "storage"
     ],
     "background": {
-        "service_worker": "background.js", "type": "module"
+        "service_worker": { "service_worker": "background.js", "type": "module" }
     },
     "icons": {
         "16": "images/icon.png",

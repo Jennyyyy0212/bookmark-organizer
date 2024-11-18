@@ -1,29 +1,27 @@
-//triggeted when a profile that has this extension installed first starts up
-chrome.runtime.onInstalled.addListener(() => {
-    initialize();
-});
-  
-  chrome.runtime.onStartup.addListener(() => {
-    initialize();
+import { runSetup } from './setup.js';
+import { addBookMark } from './bookmark.js';
+
+// Triggered when the extension is installed or updated
+chrome.runtime.onInstalled.addListener(initialize);
+
+// Triggered when the browser starts up
+chrome.runtime.onStartup.addListener(() => {
+    addBookMark(); // Always run addBookMark on startup
 });
 
-function initialize () {
-    chrome.storage.local.get("setupComplete", (data) => {
-        if (!data.setupComplete) {
-          // If setup is not complete, run setup.js
-          import('./setup.js').then(({runSetup}) => {
-              runSetup();
-          });
-          runBookmarkModule(); // After setup, transition to bookmark.js
-        } else {
-          // Setup is complete, run bookmark.js
-          runBookmarkModule();
+function initialize() {
+    chrome.storage.local.get("setupComplete", ({ setupComplete }) => {
+        if (!setupComplete) {
+            // Run setup only if it hasn't been completed
+            runSetup();
+
+            // Mark setup as complete
+            chrome.storage.local.set({ setupComplete: true }, () => {
+                console.log("Setup completed and saved.");
+            });
         }
-      });
-}
 
-function runBookmarkModule() {
-    import('./bookmark.js').then((module) => {
-        module.addBook
+        // Always run addBookMark, even after setup
+        addBookMark();
     });
 }
