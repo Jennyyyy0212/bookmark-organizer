@@ -1,4 +1,4 @@
-import { runSetup } from './setup.js';
+import { initialSetup } from './setup.js';
 import { addBookMark } from './bookmark.js';
 
 // Triggered when the extension is installed or updated
@@ -13,12 +13,8 @@ function initialize() {
     chrome.storage.local.get("setupComplete", ({ setupComplete }) => {
         if (!setupComplete) {
             // Run setup only if it hasn't been completed
-            runSetup();
-
-            // Mark setup as complete
-            chrome.storage.local.set({ setupComplete: true }, () => {
-                console.log("Setup completed and saved.");
-            });
+            initialSetup();
+            console.log("initialized.");
         }
 
         // Always run addBookMark, even after setup

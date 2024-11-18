@@ -2,7 +2,7 @@
 export async function initialSetup() {
   console.log("Running initial setup...");
 
-  //?? 
+  
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "storeLabels") {
       const folderNames = [...request.labels, "Others"]; // Add "Others" to the list of folders
