@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <title>Bookmark Organizer</title>
+</head>
+<body>
+    <div id="new-user-interface">
+        <h4>Hi! ☺️</h4>
+        <p>Please choose your label:</p>
+        <form id="label-form">
+            <input type="checkbox" id="family" name="label" value="Family">
+            <label for="family">Family 👪</label><br>
+            <input type="checkbox" id="work" name="label" value="Work">
+            <label for="work">Work 💻</label><br>
+            <input type="checkbox" id="study" name="label" value="Study">
+            <label for="study">Study 🎓</label><br>
+            <input type="checkbox" id="entertainment" name="label" value="Entertainment">
+            <label for="entertainment">Entertainment 🎉</label><br><br>
+        
+            <button type="button" id="add-label-button" class="add-label-button">+ Create new label</button>
+            <div id="new-labels-container"></div>
+            
+            <button type="button" id="done-button" class="done-button">Done</button>
+        </form>
+    </div>
+
+    <div id="popup-window" class="popup-window">
+        <img src="bookmark_icon.png" alt="Bookmark Icon" class="bookmark-icon">
+        <input type="text" id="search-bookmark" placeholder="Search Bookmark" class="search-bookmark"><br>
+        <div id="bookmark-status"></div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

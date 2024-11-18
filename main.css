@@ -1,0 +1,84 @@
+body {
+    font-family: Georgia, serif;
+    background-color: #ffffff;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+h4 {
+    margin-bottom: 5px; 
+    margin-left: 20px;
+}
+
+#new-user-interface p {
+    margin-top: 5px; 
+    margin-bottom: 10px; 
+    margin-left: 20px;
+}
+
+#new-user-interface form {
+    padding-left: 20px; /* 调整此处的值以将表单内容整体向右移动 */
+}
+
+#new-user-interface, #popup-window {
+    width: 300px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.done-button {
+    padding: 10px 20px;
+    background-color: #815b33;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-bottom: 20px; 
+    font-weight: bold;
+}
+
+.done-button:hover {
+    background-color:  #A0522D;
+}
+
+.popup-window {
+    display: none;
+}
+
+.bookmark-icon {
+    width: 40px;
+    height: 40px;
+    float: left;
+    margin-right: 10px;
+}
+
+.search-bookmark {
+    width: 85%;
+    padding: 5px;
+    margin-bottom: 15px;
+}
+
+.new-label-input {
+    width: calc(100% - 20px);
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.add-label-button {
+    margin-bottom: 5px; 
+}
+
+#new-labels-container {
+    margin-bottom: 10px; 
+}
