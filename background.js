@@ -9,11 +9,11 @@ chrome.runtime.onStartup.addListener(() => {
     addBookMark(); // Always run addBookMark on startup
 });
 
-function initialize() {
-    chrome.storage.local.get("setupComplete", ({ setupComplete }) => {
+async function initialize() {
+    chrome.storage.local.get("setupComplete", async ({ setupComplete }) => {
         if (!setupComplete) {
             // Run setup only if it hasn't been completed
-            initialSetup();
+            await initialSetup();
             console.log("initialized.");
         }
 

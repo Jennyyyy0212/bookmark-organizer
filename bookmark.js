@@ -3,6 +3,7 @@ export function addBookMark(){
     chrome.bookmarks.onCreated.addListener((_, bookmark) => {
         // Log the URL of the newly created bookmark
         //console.log("New Bookmark Added:", bookmark.url);
+        // Check if setup is in progress
         handleNewBookmark(bookmark)
     })
     
@@ -10,11 +11,16 @@ export function addBookMark(){
 
 // handle new bookmark url
 function handleNewBookmark(bookmark){
+    // Skip processing if the item is a folder (folders have no URL)
+    if (!bookmark.url) {
+        console.log(`Skipping folder: ${bookmark.title}`);
+        return;
+    }
     const category = determineCategory(bookmark.url); // define your categorize function
 
     // Retrieve the folder dictionary from local storage
     chrome.storage.local.get("FoldersDict", (data) => {
-        const folderDict = data.FoldersDict; // Retrieve the dictionary
+        const folderDict = data.FoldersDict; // Fallback to an empty object // Retrieve the dictionary
 
         // Check if a folder name exists for the category
         if (folderDict[category]) {
