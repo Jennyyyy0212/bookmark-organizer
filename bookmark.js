@@ -1,38 +1,38 @@
-// handle new bookmark url
-export function handleNewBookmark(bookmark){
+// joanne
+import { determineTag } from './testapi.js'; 
+
+// joanne: just add the "async"
+// handle new bookmark url 
+export async function handleNewBookmark(bookmark){
     // Skip processing if the item is a folder (folders have no URL)
     if (!bookmark.url) {
         console.log(`Skipping folder: ${bookmark.title}`);
         return;
     }
-    const category = determineCategory(bookmark.url); // define your categorize function
 
-    // Retrieve the folder dictionary from local storage
-    chrome.storage.local.get("FoldersDict", (data) => {
-        const folderDict = data.FoldersDict; // Fallback to an empty object // Retrieve the dictionary
+    // joanne: add a try function outside and slightly change the codes inside
+    try{
+        const {tag: category, name} = await determineTag(bookmark);
+        // Retrieve the folder dictionary from local storage
+        chrome.storage.local.get("FoldersDict", (data) => {
+            const folderDict = data.FoldersDict || {}; // Fallback to an empty object // Retrieve the dictionary
 
-        // Check if a folder name exists for the category
-        if (folderDict[category]) {
-            // Folder exists, move the bookmark to the folder
-            chrome.bookmarks.move(bookmark.id, { parentId: folderDict[category] });
-        } else {
-            // Handle bookmarks without a matching folder
-            const otherCategory = "Others"; // Default folder for uncategorized bookmarks
-
-            if (folderDict[otherCategory]) {
-                // Move to the "Others" folder if it exists
-                chrome.bookmarks.move(bookmark.id, { parentId: folderDict[otherCategory] });
+            const folderId = folderDict[category] || folderDict["Others"]; // 理论上不会使用 "Others"，但保留以防数据异常
+            // Check if a folder name exists for the category
+            if (folderId) {
+                chrome.bookmarks.move(bookmark.id, { parentId: folderId }, () => {
+                    console.log(`Moved bookmark "${name}" to category "${category}".`);
+                });
+            } else {
+                console.error(`Default folder "Others" not found.`);
             }
-        }
-    });
+        });
 
-    chrome.runtime.sendMessage({action: "bookmarkUpdated", title: bookmark.title, label: category}, function(){
-        console.log(`Moved bookmark "${bookmark.title}" to category "${category}".`);
+        chrome.runtime.sendMessage({action: "bookmarkUpdated", title: name, label: category}, () => {
+            console.log(`Moved bookmark "${name}" to category "${category}".`);
     });
-}
-
-// Function to categorize bookmarks based on the URL
-function determineCategory(url){
-    return "Study" //debug
+    } catch (error) {
+        console.error("Error handling new bookmark:", error);
+    }
 }
 
