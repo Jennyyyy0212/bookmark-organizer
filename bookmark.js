@@ -1,38 +1,33 @@
 // handle new bookmark url
-export function handleNewBookmark(bookmark){
+import { determineTag } from './testapi.js'; 
+
+export async function handleNewBookmark(bookmark){
     // Skip processing if the item is a folder (folders have no URL)
     if (!bookmark.url) {
         console.log(`Skipping folder: ${bookmark.title}`);
         return;
     }
-    const category = determineCategory(bookmark.url); // define your categorize function
 
-    // Retrieve the folder dictionary from local storage
-    chrome.storage.local.get("FoldersDict", (data) => {
-        const folderDict = data.FoldersDict; // Fallback to an empty object // Retrieve the dictionary
+    try{
+        const {tag: category, name} = await determineTag(bookmark);
 
-        // Check if a folder name exists for the category
-        if (folderDict[category]) {
-            // Folder exists, move the bookmark to the folder
-            chrome.bookmarks.move(bookmark.id, { parentId: folderDict[category] });
-        } else {
-            // Handle bookmarks without a matching folder
-            const otherCategory = "Others"; // Default folder for uncategorized bookmarks
+        // Retrieve the folder dictionary from local storage
+        chrome.storage.local.get("FoldersDict", (data) => {
+            const folderDict = data.FoldersDict || {}; // Retrieve the dictionary
 
-            if (folderDict[otherCategory]) {
-                // Move to the "Others" folder if it exists
-                chrome.bookmarks.move(bookmark.id, { parentId: folderDict[otherCategory] });
+            // Check if a folder name exists for the category
+            if (folderDict[category]) {
+                // Folder exists, move the bookmark to the folder
+                chrome.bookmarks.move(bookmark.id, { parentId: folderDict[category] });
+            } else {
+                console.error(`Folder "${category}" not found.`);
             }
-        }
-    });
+        });
 
-    chrome.runtime.sendMessage({action: "bookmarkUpdated", title: bookmark.title, label: category}, function(){
-        console.log(`Moved bookmark "${bookmark.title}" to category "${category}".`);
-    });
+        chrome.runtime.sendMessage({action: "bookmarkUpdated", title: bookmark.title, label: category}, function(){
+            console.log(`Moved bookmark "${bookmark.title}" to category "${category}".`);
+        });
+    } catch (error) {
+        console.error("Error handling new bookmark:", error);
+    }
 }
-
-// Function to categorize bookmarks based on the URL
-function determineCategory(url){
-    return "Study" //debug
-}
-
