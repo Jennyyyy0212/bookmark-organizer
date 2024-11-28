@@ -2,6 +2,11 @@
 export async function createFolders(folderNames) {
   console.log("Creating folders:", folderNames);
 
+  // joanne: 确保 "Others" 文件夹总是存在
+  if (!folderNames.includes("Others")) {
+        folderNames.push("Others");
+  }
+
   // Create folders and populate the dictionary
   const folderPromises = folderNames.map(
       (folderName) =>
