@@ -1,16 +1,5 @@
-//main fuunction after setting up
-export function addBookMark(){
-    chrome.bookmarks.onCreated.addListener((_, bookmark) => {
-        // Log the URL of the newly created bookmark
-        // console.log("New Bookmark Added:", bookmark.url);
-        // Check if setup is in progress
-        handleNewBookmark(bookmark)
-    })
-    
-}
-
 // handle new bookmark url
-function handleNewBookmark(bookmark){
+export function handleNewBookmark(bookmark){
     // Skip processing if the item is a folder (folders have no URL)
     if (!bookmark.url) {
         console.log(`Skipping folder: ${bookmark.title}`);
