@@ -2,7 +2,7 @@
 export function addBookMark(){
     chrome.bookmarks.onCreated.addListener((_, bookmark) => {
         // Log the URL of the newly created bookmark
-        //console.log("New Bookmark Added:", bookmark.url);
+        // console.log("New Bookmark Added:", bookmark.url);
         // Check if setup is in progress
         handleNewBookmark(bookmark)
     })
