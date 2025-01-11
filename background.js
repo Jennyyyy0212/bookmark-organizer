@@ -4,10 +4,18 @@ import { handleNewBookmark } from './bookmark1.js';
 // Attach bookmark event listener at the top level
 //main fuunction after setting up
 // Attach bookmark event listener at the top level
-chrome.bookmarks.onCreated.addListener((id, bookmark) => {
-    console.log(`New bookmark created: ${bookmark.title} (${bookmark.url})`);
-    handleNewBookmark(bookmark); // Call the handler directly
-});
+chrome.bookmarks.onCreated.addListener(bookmarkCreatedHandler);
+
+function bookmarkCreatedHandler(id, bookmark) {
+    chrome.bookmarks.onCreated.removeListener(bookmarkCreatedHandler);
+    setTimeout(() => {
+        console.log(`New bookmark created: ${bookmark.title} (${bookmark.url})`);
+        handleNewBookmark(bookmark).finally(() => {
+            //re-add lisitener
+            chrome.bookmarks.onCreated.addListener(bookmarkCreatedHandler);
+        });
+    }, 5000); 
+}
 
 
 // Triggered when the extension is installed or updated
