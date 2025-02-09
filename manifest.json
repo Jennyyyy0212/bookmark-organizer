@@ -13,7 +13,8 @@
       "nativeMessaging",
       "storage",
       "aiLanguageModelOriginTrial",
-      "activeTab"
+      "activeTab",
+      "tabs"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
