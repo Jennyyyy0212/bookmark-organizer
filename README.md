@@ -77,5 +77,5 @@ After loading the extension, the popup window will show up.
 1. When you find a page you want to bookmark, click the bookmark star icon in the address bar.
 
     > **DO NOT** interact with the Google bookmark popup that appears because it might redirect the bookmark add into another folder. Instead, click anywhere outside the popup to close it.
-2. Wait a moment, and the extension will automatically categorize the page into the appropriate folder you set up earlier.
+2. Wait a seconds (normally run from 1s to 3s), and the extension will automatically categorize the page into the appropriate folder you set up earlier.
 
