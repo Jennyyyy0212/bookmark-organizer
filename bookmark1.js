@@ -9,8 +9,8 @@ export async function handleNewBookmark(bookmark){
     }
 
     try{
-        //const {tag: category, name} = await determineTag(bookmark);
-        const category = "Study"
+        const {tag: category, name} = await determineTag(bookmark);
+        // const category = "Study" change1
 
         // Retrieve the folder dictionary from local storage
         const data = await chrome.storage.local.get("FoldersDict");
@@ -21,7 +21,7 @@ export async function handleNewBookmark(bookmark){
             // Folder exists, move the bookmark to the folder
             // Create the bookmark directly in the target folder
             chrome.bookmarks.create(
-                { parentId: folderDict[category], title: bookmark.title, url: bookmark.url },
+                { parentId: folderDict[category], title: name, url: bookmark.url }, // change 2 : title > name
                 (newBookmark) => {
                     if (chrome.runtime.lastError) {
                         console.error("Error creating bookmark:", chrome.runtime.lastError);
@@ -32,8 +32,25 @@ export async function handleNewBookmark(bookmark){
                     }
                 }
             );
-            chrome.runtime.sendMessage({action: "bookmarkUpdated", title: bookmark.title, label: category}, function(){
-                console.log(`Moved bookmark "${bookmark.title}" to category "${category}".`);
+            chrome.runtime.sendMessage({action: "bookmarkUpdated", title: name, label: category}, function(){ // change 3 and 4: title > name
+                console.log(`Moved bookmark "${name}" to category "${category}".`);
+            });
+        } else {
+            console.log(`Cannot find folder "${category}". Move the bookmark to "Others" folder`);
+            chrome.bookmarks.create(
+                { parentId: folderDict["Others"], title: name, url: bookmark.url }, // change 2 : title > name
+                (newBookmark) => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Error creating bookmark:", chrome.runtime.lastError);
+                    } else {
+                        console.log(
+                            `Bookmark "${bookmark.title}" created in folder "${category}".`
+                        );
+                    }
+                }
+            );
+            chrome.runtime.sendMessage({action: "bookmarkUpdated", title: name, label: category}, function(){ // change 3 and 4: title > name
+                console.log(`Moved bookmark "${name}" to category "Others".`);
             });
         }
     } catch (error) {
