@@ -22,7 +22,7 @@ h4 {
 }
 
 #new-user-interface form {
-    padding-left: 20px; /* 调整此处的值以将表单内容整体向右移动 */
+    padding-left: 20px;
 }
 
 #new-user-interface, #popup-window {
