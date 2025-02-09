@@ -1,94 +1,132 @@
-export async function determineTag(bookmark) {
-
-    if(!('ai' in self)){
-        // error for developer
-        console.error("This API only works in Chrome with prompt API");
-        // error for users
-        alert("Prompt API is not supported in your browser. Please use a compatible version of Chrome.");
-        return { tag: "Others", name: bookmark.title };
-    }
-
-    // extract content of webpage
-    const title = document.querySelector('title')?.innerText || bookmark.title || 'No title found';
-    const metaDescription = document.querySelector('meta[name="description"]')?.content || 'No Description Found';
-    console.log("Title:", title);
-    console.log("Meta Description:", metaDescription);
-
-    // ensure the language model is ready for use
-    const {available, defaultTemperature, defaultTopK, maxTopK } = await ai.languageModel.capabilities();
-    console.log("Available Capabilities:", available);
-    if (available === "no") {
-        console.error("Language model is not available.");
-        return { tag: "Others", name: bookmark.title };
-    }
-
-    // function to get the user tags from storage
-    async function getTags() {
-        return new Promise((resolve, reject) => {
-            chrome.storage.local.get(["FoldersDict"], (result) => {
-                if (chrome.runtime.lastError) {
-                    reject(chrome.runtime.lastError);
-                } else {
-                    const folderDict = result.FoldersDict || {};
-                    const tagNames = Object.keys(folderDict); 
-                    resolve(tagNames); 
-                }
-            });
-        });
-    }
-    
-
+// parse the response from the language model API
+async function parseResponse(text) {
     try {
-
-        const tags = await getTags(); 
-        console.log("Available Tags:", tags);          
-
-        const session = await ai.languageModel.create();
-        const prompt = `
-            Based on the webpage details provided below:
-            title of the url: ${title}
-            meta description of the url: ${metaDescription}
-
-            Analyze carefully and deeply what these tags mean 
-            and then accurately classify the webpage only into one of these categories:
-            ${tags.join(", ")}
-
-            Generate a highly specific bookmark name for this page.
-            Consider the following factors: 
-            time sensitivity, key benefits, personal interests, and overall tone. 
-            The bookmark name should be concise, memorable, 
-            and accurately reflect the reason why I'm saving this page at the moment
-            (for example, if it's a webpage about black friday deals 
-            and saved during black friday season, 
-            you should include 'black friday deal' in the bookmark name)
-            Format your response only as:
-            Recommended Bookmark Name: [Generated name]
-            Selected Tag: [${tags.join(", ")}]
-        `;
-
-        const result = await session.prompt(prompt);
-        if (!result || !result.text) {
-            // stop the program and throw the error to developers
-            throw new Error("Empty response from language model.");
+        if (!text) {
+            console.error("Empty response");
+            return null;
         }
-        // console.log(result);
+        
+        console.log("Raw response text:", text);
+        
 
-        const name = result.text.match(/Recommended Bookmark Name:\s*(.*)/)?.[1]?.trim();
-        const tag = result.text.match(/Selected Tag:\s*(.*)/)?.[1]?.trim();
-
-        if (!name || !tag) {
-            throw new Error("Invalid response format.");
+        // extract tag and summary from response
+        const tagMatch = text.match(/Tag:\s*(\w+)/i);
+        const summaryMatch = text.match(/Summary:\s*(.+?)(?=\n|$)/i);
+        
+        if (!tagMatch || !summaryMatch) {
+            console.error("Failed to extract tag or summary from response");
+            return null;
         }
-
-        console.log("Generated Name:", name);
-        console.log("Selected Tag:", tag);
-
-        return { tag, name };
-    } catch (err) {
-        console.error("Error during prompt generation:", err);
-        return { tag: "Others", name: bookmark.title };  // 理论上不会触发，仅作为兜底
-    } finally {
-        session.destroy();
+        
+        const tag = tagMatch[1].trim();
+        const summary = summaryMatch[1].trim();
+        
+        console.log("Extracted tag:", tag);
+        console.log("Extracted summary:", summary);
+        
+        return {
+            tag: tag,
+            summary: summary
+        };
+    } catch (error) {
+        console.error("Error parsing response:", error);
+        return null;
     }
 }
 
+// main function to determine tag and summary for a bookmark
+export async function determineTag(bookmark) {
+    try {
+        // check if prompt API is available
+        if (!('ai' in self)) {
+            console.error("Prompt API not supported");
+            alert("Prompt API is not supported in your browser");
+            return { tag: "Others", name: bookmark.title };
+        }
+
+
+        // check if API is capable of processing the request
+        const capabilities = await ai.languageModel.capabilities();
+        console.log("API Capabilities:", capabilities);
+
+        if (capabilities.available === "no") {
+            console.error("Language model unavailable");
+            alert("Language model unavailable");
+            return { tag: "Others", name: bookmark.title };
+        }
+
+
+        // create a new session
+        const session = await ai.languageModel.create({
+            systemPrompt: "You are a direct and concise assistant that analyzes URLs and categorizes them appropriately. " 
+        });
+
+        if (!session) {
+            console.error("Failed to create session");
+            return { tag: "Others", name: bookmark.title };
+        }
+
+        
+        // function to get the user's customized tags from storage
+        async function getTags() {
+            return new Promise((resolve, reject) => {
+                chrome.storage.local.get(["FoldersDict"], (result) => {
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError);
+                    } else {
+                        const folderDict = result.FoldersDict || {};
+                        const tagNames = Object.keys(folderDict); 
+                        resolve(tagNames); 
+                    }
+                });
+            });
+        }
+        const tags = await getTags(); 
+        console.log("Available Tags:", tags);  
+
+        // send prompt to API
+        const prompt = `
+            Analyze: ${bookmark.url}
+            Choose exactly one most relevant tag from: ${tags.join(", ")}
+            
+            Respond in this format:
+            Tag: [chosen tag]
+            Summary: [Direct and highly specific description of the content, 
+            should be concise, memorable, 
+            and accurately reflect the reason why I'm saving this page at the moment
+            (for example, if it's a webpage about black friday deals 
+            and saved during black friday season, 
+            you should include 'black friday deal' in the bookmark name)]
+            
+            Example response:
+            Tag: Technology
+            Summary: Google Chrome developer documentation for building web applications.
+        `;
+
+        console.log("Sending prompt to API:", prompt);
+
+
+        // use the non-stream at once version to get the full response
+        const result = await session.prompt(prompt);
+        console.log("API raw response:", result);
+
+        if (!result) {
+            console.error("API returned empty or invalid response");
+            return { tag: "Others", name: bookmark.title };
+        }
+
+
+        // prase the response
+        const parsed = await parseResponse(result);
+        if (parsed) {
+            console.log("Parsed response:", parsed);
+            return { tag: parsed.tag, name: parsed.summary };
+        } else {
+            console.error("Failed to parse response");
+            return { tag: "Others", name: bookmark.title };
+        }
+    } catch (error) {
+        console.error("Error during determineTag execution:", error);
+        return { tag: "Others", name: bookmark.title };
+    }
+}
