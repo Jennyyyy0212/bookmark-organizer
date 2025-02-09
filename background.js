@@ -2,24 +2,40 @@ import { createFolders } from './setup.js';
 import { handleNewBookmark } from './bookmark1.js';
 
 // Attach bookmark event listener at the top level
-//main fuunction after setting up
+// main function after setting up
 // Attach bookmark event listener at the top level
 chrome.bookmarks.onCreated.addListener(bookmarkCreatedHandler);
 
 function bookmarkCreatedHandler(id, bookmark) {
     chrome.bookmarks.onCreated.removeListener(bookmarkCreatedHandler);
     setTimeout(() => {
+        console.time("CreateNewBookmarkTime");
         console.log(`New bookmark created: ${bookmark.title} (${bookmark.url})`);
         handleNewBookmark(bookmark).finally(() => {
+            console.timeEnd("CreateNewBookmarkTime");
             //re-add lisitener
             chrome.bookmarks.onCreated.addListener(bookmarkCreatedHandler);
         });
     }, 5000); 
+
+    //Delete the original bookmark created by Chrome
+    if (bookmark.url){
+        chrome.bookmarks.remove(id);
+        console.log("Deleted original bookmark and added categorized version.");
+    }
 }
 
 
 // Triggered when the extension is installed or updated
-chrome.runtime.onInstalled.addListener(initialize);
+chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason === "install"){
+        chrome.action.openPopup();
+        //initilaize the folder after opening the popup
+        console.time("SetupTime");
+        initialize();
+        console.timeEnd("SetupTime");
+    }
+});
 
 // Triggered when the browser starts up
 chrome.runtime.onStartup.addListener(() => {
