@@ -1,5 +1,5 @@
 import { createFolders } from './setup.js';
-import { handleNewBookmark } from './bookmark1.js';
+import { handleNewBookmark } from './bookmark.js';
 
 // Attach bookmark event listener at the top level
 // main function after setting up
